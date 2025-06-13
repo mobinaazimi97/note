@@ -41,25 +41,18 @@ public class NoteService {
         noteRepo.deleteById(id);
     }
 
-    // متد به روز شده برای قفل کردن نوت
-    public Note lockNoteById(Long id) {
+    public Note lockNote(Long id) {
         Note note = getNoteById(id);
-        if (note != null) {
-            note.setLocked(true);
-            return noteRepo.save(note);
-        }
-        return null;
+        note.setLocked(true);
+        return noteRepo.save(note);
     }
 
-    // متد به روز شده برای باز کردن قفل نوت
-    public Note unlockNoteById(Long id) {
+    public Note unlockNote(Long id) {
         Note note = getNoteById(id);
-        if (note != null) {
-            note.setLocked(false);
-            return noteRepo.save(note);
-        }
-        return null;
+        note.setLocked(false);
+        return noteRepo.save(note);
     }
+
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -72,26 +65,15 @@ public class NoteService {
         return noteRepo.findByTitle(title);
     }
 
-//    public Note saveNote(Note note) {
-//        note.setUser(getCurrentUser());
-//        return noteRepo.save(note);
-//    }
-//
     public Note updateNote(Long noteId, Note updatedNote) {
         // ابتدا نوت موجود را از دیتابیس می‌گیریم
         Note existingNote = noteRepo.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found with id: " + noteId));
 
-        // فیلدهای مورد نظر را آپدیت می‌کنیم
         existingNote.setTitle(updatedNote.getTitle());
         existingNote.setContent(updatedNote.getContent());
         existingNote.setCategory(updatedNote.getCategory());
         existingNote.setLocked(updatedNote.isLocked());
-
-        // اگر نیاز هست، می‌توان رابطه کاربر را هم آپدیت کرد:
-        // existingNote.setUser(updatedNote.getUser());
-
-        // نوت آپدیت شده را ذخیره می‌کنیم
         return noteRepo.save(existingNote);
     }
 //

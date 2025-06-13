@@ -24,6 +24,7 @@ public class Note {
     @Column(name = "category")
     private String category;
     @Column(name = "content")
+    @Lob
     private String content;
     @Column(name = "createAt")
     private LocalDateTime createAt;

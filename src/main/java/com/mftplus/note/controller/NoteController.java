@@ -18,72 +18,130 @@ public class NoteController {
         this.noteService = noteService;
     }
 
-    //    @GetMapping
-//    public String listNotes(@RequestParam(required = false) String category,
-//                            @RequestParam(required = false) String keyword,
-//                            Model model) {
-//        List<Note> notes;
-//        if (keyword != null && !keyword.isEmpty()) {
-//            notes = noteService.searchNotes(keyword);
-//        } else if (category != null && !category.isEmpty()) {
-//            notes = noteService.getNotesByCategory(category);
-//        } else {
-//            notes = noteService.getAllNotes();
-//        }
-//        model.addAttribute("notes", notes);
-//        model.addAttribute("selectedCategory", category == null ? "" : category);
-//        model.addAttribute("keyword", keyword == null ? "" : keyword);
-//        return "home";
-//    }
-
     @GetMapping
     public String listNotes(Model model) {
-        model.addAttribute("notes", noteService.getAllNotesForCurrentUser());
-        return "notes/list";
+        List<Note> notes = noteService.getAllNotesForCurrentUser();
+        model.addAttribute("notes", notes);
+        return "notes/list";  // refers to src/main/resources/templates/notes/list.html
     }
 
-    @GetMapping("/add")
-    public String showAddForm(Model model) {
+    // صفحه نمایش جزئیات یک نوت
+    @GetMapping("/{id}")
+    public String noteDetails(@PathVariable Long id, Model model) {
+        Note note = noteService.getNoteById(id);
+        if (note == null) {
+            return "redirect:/notes"; // اگر نوت پیدا نشد، به لیست برمی‌گردیم
+        }
+        model.addAttribute("note", note);
+        return "notes/detail";  // refers to templates/notes/detail.html
+    }
+
+    // صفحه فرم ایجاد نوت جدید
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
         model.addAttribute("note", new Note());
-        return "notes/add";
+        return "notes/create";  // refers to templates/notes/create.html
     }
 
-    @PostMapping("/add")
-    public String saveNote(@ModelAttribute("note") Note note) {
+    // ذخیره نوت جدید
+    @PostMapping
+    public String createNote(@ModelAttribute Note note) {
         noteService.saveNote(note);
         return "redirect:/notes";
     }
 
-    @GetMapping("/edit/{id}")
+    // صفحه فرم ویرایش نوت
+    @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
         Note note = noteService.getNoteById(id);
+        if (note == null) {
+            return "redirect:/notes";
+        }
         model.addAttribute("note", note);
-        return "notes/edit";
+        return "notes/edit";  // refers to templates/notes/edit.html
     }
 
-    @PostMapping("/update/{id}")
-    public String updateNote(@PathVariable Long id, @ModelAttribute("note") Note note) {
+    // ویرایش نوت
+    @PostMapping("/{id}")
+    public String updateNote(@PathVariable Long id, @ModelAttribute Note note) {
         noteService.updateNote(id, note);
-        return "redirect:/notes";
+        return "redirect:/notes/" + id;
     }
 
-    @GetMapping("/delete/{id}")
+    // حذف نوت
+    @PostMapping("/{id}/delete")
     public String deleteNote(@PathVariable Long id) {
         noteService.deleteNoteById(id);
         return "redirect:/notes";
     }
 
-    @GetMapping("/lock/{id}")
-    public String lockNote(@PathVariable Long id) {
-        noteService.lockNoteById(id);
-        return "redirect:/notes";
-    }
+//    @GetMapping
+//    public String listNotes(Model model) {
+//        model.addAttribute("notes", noteService.getAllNotesForCurrentUser());
+//        return "notes/list";
+//    }
+//
+//    @GetMapping("/add")
+//    public String showAddForm(Model model) {
+//        model.addAttribute("note", new Note());
+//        return "notes/add";
+//    }
+//
+//    @PostMapping("/add")
+//    public String saveNote(@ModelAttribute("note") Note note) {
+//        noteService.saveNote(note);
+//        return "redirect:/notes";
+//    }
+//
+//    @GetMapping("/edit/{id}")
+//    public String showEditForm(@PathVariable Long id, Model model) {
+//        Note note = noteService.getNoteById(id);
+//        model.addAttribute("note", note);
+//        return "notes/edit";
+//    }
+//
+//    @PostMapping("/update/{id}")
+//    public String updateNote(@PathVariable Long id, @ModelAttribute("note") Note note) {
+//        noteService.updateNote(id, note);
+//        return "redirect:/notes";
+//    }
+//
+//    @GetMapping("/delete/{id}")
+//    public String deleteNote(@PathVariable Long id) {
+//        noteService.deleteNoteById(id);
+//        return "redirect:/notes";
+//    }
+//
+//    @GetMapping("/lock/{id}")
+//    public String lockNote(@PathVariable Long id) {
+//        noteService.lockNote(id);
+//        return "redirect:/notes";
+//    }
+//
+//    @GetMapping("/unlock/{id}")
+//    public String unlockNote(@PathVariable Long id) {
+//        noteService.unlockNote(id);
+//        return "redirect:/notes";
+//    }
+    //------------------------------------------------
 
-    @GetMapping("/unlock/{id}")
-    public String unlockNote(@PathVariable Long id) {
-        noteService.unlockNoteById(id);
-        return "redirect:/notes";
-    }
+    //    @GetMapping
+    //    public String listNotes(@RequestParam(required = false) String category,
+    //                            @RequestParam(required = false) String keyword,
+    //                            Model model) {
+    //        List<Note> notes;
+    //        if (keyword != null && !keyword.isEmpty()) {
+    //            notes = noteService.searchNotes(keyword);
+    //        } else if (category != null && !category.isEmpty()) {
+    //            notes = noteService.getNotesByCategory(category);
+    //        } else {
+    //            notes = noteService.getAllNotes();
+    //        }
+    //        model.addAttribute("notes", notes);
+    //        model.addAttribute("selectedCategory", category == null ? "" : category);
+    //        model.addAttribute("keyword", keyword == null ? "" : keyword);
+    //        return "home";
+    //    }
     //----------------------------------------------------------
 //    @GetMapping
 //    public String listNotes(Model model) {

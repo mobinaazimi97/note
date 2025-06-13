@@ -16,12 +16,25 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("کاربر یافت نشد: " + username));
-        return new CustomUserDetails(user);
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getUsername())
+                .password(user.getPassword())
+                .authorities(user.getRole())  // فرض کردم نقش به صورت رشته است، اگر نیست، باید تبدیل کنی
+                .build();
+    }
+//------------------------------------------
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("کاربر یافت نشد: " + username));
+//        return new CustomUserDetails(user);
+
+    //---------------------------
 
 //        User user1 = User.builder()
 //                .username(user.getUsername())
@@ -29,7 +42,5 @@ public class CustomUserDetailsService implements UserDetailsService {
 //                .role(user.getRole())
 //                .build();
 //        return ;
-
-    }
 
 }

@@ -16,8 +16,8 @@ public interface NoteRepo extends JpaRepository<Note, Long> {
 
     List<Note> findAllByUser(User owner);
 
-//    @Query("SELECT n FROM noteEntity n WHERE n.user = :user")
-//    List<Note> findByUser(@Param("user") User user);
+    @Query("SELECT n FROM noteEntity n WHERE n.user = :user")
+    List<Note> findByUser(@Param("user") User user);
 
     @Query("SELECT n FROM noteEntity n WHERE n.user.id = :id")
     List<Note> findByUserId(@Param("id") Long id);

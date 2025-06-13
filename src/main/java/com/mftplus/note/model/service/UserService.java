@@ -20,7 +20,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
     public boolean existsByUsername(String username) {
-        return userRepository.findByUsername(username).isPresent();
+        return userRepository.existsByUsername(username);
     }
 
     public List<User> getAllUsers() {
@@ -48,11 +48,20 @@ public class UserService {
 
     public User updateUser(Long id, User updatedUser) {
         User user = getUserById(id);
-        user.setUsername(updatedUser.getUsername());
-        if(updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()){
+
+        if (!user.getUsername().equals(updatedUser.getUsername())) {
+            if (existsByUsername(updatedUser.getUsername())) {
+                throw new RuntimeException("نام کاربری قبلاً ثبت شده است");
+            }
+            user.setUsername(updatedUser.getUsername());
+        }
+
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
+
         user.setRole(updatedUser.getRole());
+
         return userRepository.save(user);
     }
 
