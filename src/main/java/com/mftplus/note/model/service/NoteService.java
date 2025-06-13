@@ -23,12 +23,6 @@ public class NoteService {
         this.userRepository = userRepository;
     }
 
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return userRepository.findById(username).orElseThrow(() -> new RuntimeException("کاربر یافت نشد"));
-    }
-
     public List<Note> getAllNotesForCurrentUser() {
         User currentUser = getCurrentUser();
         return noteRepo.findAllByUser(currentUser);
@@ -39,6 +33,50 @@ public class NoteService {
         return noteRepo.save(note);
     }
 
+    public Note getNoteById(Long id) {
+        return noteRepo.findById(id).orElse(null);
+    }
+
+    public void deleteNoteById(Long id) {
+        noteRepo.deleteById(id);
+    }
+
+    // متد به روز شده برای قفل کردن نوت
+    public Note lockNoteById(Long id) {
+        Note note = getNoteById(id);
+        if (note != null) {
+            note.setLocked(true);
+            return noteRepo.save(note);
+        }
+        return null;
+    }
+
+    // متد به روز شده برای باز کردن قفل نوت
+    public Note unlockNoteById(Long id) {
+        Note note = getNoteById(id);
+        if (note != null) {
+            note.setLocked(false);
+            return noteRepo.save(note);
+        }
+        return null;
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("کاربر یافت نشد"));
+    }
+
+    public List<Note> findByTitle(String title) {
+        return noteRepo.findByTitle(title);
+    }
+
+//    public Note saveNote(Note note) {
+//        note.setUser(getCurrentUser());
+//        return noteRepo.save(note);
+//    }
+//
     public Note updateNote(Long noteId, Note updatedNote) {
         // ابتدا نوت موجود را از دیتابیس می‌گیریم
         Note existingNote = noteRepo.findById(noteId)
@@ -56,72 +94,84 @@ public class NoteService {
         // نوت آپدیت شده را ذخیره می‌کنیم
         return noteRepo.save(existingNote);
     }
-
-
-    public List<Note> getAllNotes() {
-        return noteRepo.findAll();
-    }
-
-    public List<Note> getNotesByCategory(String category) {
-        return noteRepo.findByCategory(category);
-    }
-
-    public Note getNoteById(Long id) {
-        return noteRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("یادداشت پیدا نشد با id: " + id));
-    }
-
-//    public Note saveOrUpdate(Note note) {
-//        if (note.getCreateAt() == null) {
-//            note.setCreateAt(LocalDateTime.now());
-//        }
+//
+//
+//    public List<Note> getAllNotes() {
+//        return noteRepo.findAll();
+//    }
+//
+//    public List<Note> getNotesByCategory(String category) {
+//        return noteRepo.findByCategory(category);
+//    }
+//
+//    public Note getNoteById(Long id) {
+//        return noteRepo.findById(id)
+//                .orElseThrow(() -> new RuntimeException("یادداشت پیدا نشد با id: " + id));
+//    }
+//
+////    public Note saveOrUpdate(Note note) {
+////        if (note.getCreateAt() == null) {
+////            note.setCreateAt(LocalDateTime.now());
+////        }
+////        return noteRepo.save(note);
+////    }
+//
+//    public List<Note> searchNotes(String keyword) {
+//        String lowerKeyword = keyword.toLowerCase();
+//        return noteRepo.findAll().stream()
+//                .filter(note -> note.getTitle().toLowerCase().contains(lowerKeyword) ||
+//                        note.getContent().toLowerCase().contains(lowerKeyword))
+//                .collect(Collectors.toList());
+//    }
+//
+//    public List<Note> getNotesByUserId(Long id) {
+//        User user = userRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+//        return noteRepo.findByUserId(user.getId());
+//    }
+//
+//    public List<Note> getNotesByUsername(String username) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+//        return noteRepo.findByUsername(user.getUsername());
+//    }
+//
+//    public Note lockNote(Long id) {
+//        Note note = getNoteById(id);
+//        note.setLocked(true);
 //        return noteRepo.save(note);
 //    }
 
-    public List<Note> searchNotes(String keyword) {
-        String lowerKeyword = keyword.toLowerCase();
-        return noteRepo.findAll().stream()
-                .filter(note -> note.getTitle().toLowerCase().contains(lowerKeyword) ||
-                        note.getContent().toLowerCase().contains(lowerKeyword))
-                .collect(Collectors.toList());
-    }
-
-    public Note lockNote(Long id) {
-        Note note = getNoteById(id);
-        note.setLocked(true);
-        return noteRepo.save(note);
-    }
-
-    // باز کردن قفل یادداشت
-    public Note unlockNote(Long id) {
-        Note note = getNoteById(id);
-        note.setLocked(false);
-        return noteRepo.save(note);
-    }
-
-    public void deleteNote(Long id) {
-        noteRepo.deleteById(id);
-    }
-
-    public void lockNoteById(Long noteId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new RuntimeException("کاربر لاگین نکرده است");
-        }
-
-        Note note = getNoteById(noteId);
-        note.setLocked(true);
-        noteRepo.save(note);
-    }
-
-    public void unlockNoteById(Long noteId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new RuntimeException("کاربر لاگین نکرده است");
-        }
-
-        Note note = getNoteById(noteId);
-        note.setLocked(false);
-        noteRepo.save(note);
-    }
+////    // باز کردن قفل یادداشت
+//    public Note unlockNote(Long id) {
+//        Note note = getNoteById(id);
+//        note.setLocked(false);
+//        return noteRepo.save(note);
+//    }
+//
+//    public void deleteNote(Long id) {
+//        noteRepo.deleteById(id);
+//    }
+//
+//    public void lockNoteById(Long noteId) {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        if (auth == null || !auth.isAuthenticated()) {
+//            throw new RuntimeException("کاربر لاگین نکرده است");
+//        }
+//
+//        Note note = getNoteById(noteId);
+//        note.setLocked(true);
+//        noteRepo.save(note);
+//    }
+//
+//    public void unlockNoteById(Long noteId) {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        if (auth == null || !auth.isAuthenticated()) {
+//            throw new RuntimeException("کاربر لاگین نکرده است");
+//        }
+//
+//        Note note = getNoteById(noteId);
+//        note.setLocked(false);
+//        noteRepo.save(note);
+//    }
 }
